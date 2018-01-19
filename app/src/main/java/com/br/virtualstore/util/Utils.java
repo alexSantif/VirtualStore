@@ -32,6 +32,10 @@ public class Utils {
         toast.show();
     }
 
+    public static void showMsgSimpleToast(Activity activity, String txt) {
+        Toast.makeText(activity, txt, Toast.LENGTH_SHORT).show();
+    }
+
     public static void showMsgConfirm(final Activity activity, String titulo, String txt, TipoMsg tipoMsg, DialogInterface.OnClickListener listener) {
         int theme = 0, icone = 0;
         switch (tipoMsg) {

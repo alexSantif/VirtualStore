@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,18 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.br.virtualstore.R;
+import com.br.virtualstore.entity.User;
+import com.br.virtualstore.util.Constants;
+import com.google.gson.Gson;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+
+import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.entity.StringEntity;
 
 /**
  * Created by Alex on 02/01/2018.
@@ -43,6 +56,24 @@ public class FragmentPerfil extends Fragment {
                 if(!validarNome()) {
                     return;
                 }
+
+                final Gson gson = new Gson();
+                String json = gson.toJson(criarPessoa());
+
+                try {
+                    StringEntity stringEntity = new StringEntity(json);
+                    new AsyncHttpClient().post(null, Constants.URL_WS_BASE + "user/teste", stringEntity, "application_json", new JsonHttpResponseHandler(){
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            Log.e("response", response.toString());
+                            gson.fromJson(response.toString(), User.class);
+                        }
+                    });
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+
             }
         });
 
@@ -57,5 +88,16 @@ public class FragmentPerfil extends Fragment {
             lytTxtNome.setErrorEnabled(false);
         }
         return true;
+    }
+
+    private User criarPessoa() {
+        User pessoa = new User();
+        pessoa.setCodProfissao(1);
+        pessoa.setEmail("teste@teste.com");
+        pessoa.setMiniBio("Teste MiniBio");
+        pessoa.setSexo('M');
+        pessoa.setNome("Teste");
+
+        return pessoa;
     }
 }
