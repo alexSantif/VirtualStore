@@ -8,19 +8,28 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.br.virtualstore.R;
+import com.br.virtualstore.adapter.ProfissaoAdapter;
+import com.br.virtualstore.entity.Profissao;
 import com.br.virtualstore.entity.User;
 import com.br.virtualstore.util.Constants;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
@@ -35,6 +44,10 @@ public class FragmentPerfil extends Fragment {
     private TextInputLayout lytTxtNome;
     private TextView txtNome;
 
+    private Spinner spnProfissao;
+
+    private List<Profissao> profissoes;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,11 +57,40 @@ public class FragmentPerfil extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_perfil, container, false);
+        final View view = inflater.inflate(R.layout.fragment_perfil, container, false);
+
+        final RelativeLayout lytLoading = view.findViewById(R.id.lytLoading);
+        lytLoading.setVisibility(View.VISIBLE);
 
         btnCadastrar = view.findViewById(R.id.btnCadastrar);
         txtNome = view.findViewById(R.id.txtNome);
         lytTxtNome = view.findViewById(R.id.lytTxtNome);
+        spnProfissao = view.findViewById(R.id.spnProfissao);
+
+        new AsyncHttpClient().get(Constants.URL_WS_BASE + "user/get_profissoes", new JsonHttpResponseHandler(){
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                Log.e("response", response.toString());
+                profissoes = new ArrayList<>();
+                if(response != null) {
+                    for(int i = 0; i < response.length(); i++) {
+                        try {
+                            JSONObject jsonObject = response.getJSONObject(i);
+                            profissoes.add(new Gson().fromJson(jsonObject.toString(), Profissao.class));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+
+                ProfissaoAdapter arrayAdapter = new ProfissaoAdapter(getActivity(), R.layout.linha_profissao, profissoes);
+                spnProfissao.setAdapter(arrayAdapter);
+                lytLoading.setVisibility(View.GONE);
+
+
+            }
+        });
 
         btnCadastrar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,7 +104,7 @@ public class FragmentPerfil extends Fragment {
 
                 try {
                     StringEntity stringEntity = new StringEntity(json);
-                    new AsyncHttpClient().post(null, Constants.URL_WS_BASE + "user/teste", stringEntity, "application_json", new JsonHttpResponseHandler(){
+                    new AsyncHttpClient().post(null, Constants.URL_WS_BASE + "user/add", stringEntity, "application_json", new JsonHttpResponseHandler(){
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             Log.e("response", response.toString());
