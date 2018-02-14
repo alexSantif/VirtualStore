@@ -11,6 +11,7 @@ public class User {
     private String miniBio;
     private char sexo;
     private int codProfissao;
+    private Profissao profissao;
 
     public String getNome() {
         return nome;
@@ -50,5 +51,13 @@ public class User {
 
     public void setCodProfissao(int codProfissao) {
         this.codProfissao = codProfissao;
+    }
+
+    public Profissao getProfissao() {
+        return profissao;
+    }
+
+    public void setProfissao(Profissao profissao) {
+        this.profissao = profissao;
     }
 }

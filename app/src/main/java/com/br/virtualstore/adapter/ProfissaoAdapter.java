@@ -14,6 +14,7 @@ import com.br.virtualstore.R;
 import com.br.virtualstore.async.AsyncImageHelper;
 import com.br.virtualstore.entity.Profissao;
 import com.br.virtualstore.util.Constants;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -68,7 +69,8 @@ public class ProfissaoAdapter extends ArrayAdapter<Profissao> {
         txtDescricao.setText(profissao.getSubDescricao());
 
         ImageView imgProfissao = linha.findViewById(R.id.imgProfissao);
-        new AsyncImageHelper(imgProfissao).execute(Constants.URL_WEB_BASE + profissao.getUrlImg());
+        Picasso.with(imgProfissao.getContext()).load(Constants.URL_WEB_BASE + profissao.getUrlImg()).into(imgProfissao);
+      //  new AsyncImageHelper(imgProfissao).execute(Constants.URL_WEB_BASE + profissao.getUrlImg());
 
         return linha;
     }

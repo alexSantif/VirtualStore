@@ -10,9 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.br.virtualstore.R;
 import com.br.virtualstore.adapter.ProfissaoAdapter;
@@ -20,6 +23,7 @@ import com.br.virtualstore.entity.Profissao;
 import com.br.virtualstore.entity.User;
 import com.br.virtualstore.util.Constants;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -28,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +47,11 @@ public class FragmentPerfil extends Fragment {
 
     private Button btnCadastrar;
     private TextInputLayout lytTxtNome;
+    private TextView txtMiniBio;
+    private TextView txtEmail;
     private TextView txtNome;
+    private RadioGroup rbgSexo;
+    private RadioButton rbtMasc, rbtFem;
 
     private Spinner spnProfissao;
 
@@ -59,6 +68,8 @@ public class FragmentPerfil extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_perfil, container, false);
 
+        final Gson gson = new Gson();
+
         final RelativeLayout lytLoading = view.findViewById(R.id.lytLoading);
         lytLoading.setVisibility(View.VISIBLE);
 
@@ -66,28 +77,31 @@ public class FragmentPerfil extends Fragment {
         txtNome = view.findViewById(R.id.txtNome);
         lytTxtNome = view.findViewById(R.id.lytTxtNome);
         spnProfissao = view.findViewById(R.id.spnProfissao);
+        txtEmail = view.findViewById(R.id.txtEmail);
+        txtMiniBio = view.findViewById(R.id.txtMinibio);
 
-        new AsyncHttpClient().get(Constants.URL_WS_BASE + "user/get_profissoes", new JsonHttpResponseHandler(){
+        rbgSexo = view.findViewById(R.id.groupSexo);
+        rbtFem = view.findViewById(R.id.rbtFem);
+        rbtMasc = view.findViewById(R.id.rbtMasc);
+
+        spnProfissao = view.findViewById(R.id.spnProfissao);
+
+        new AsyncHttpClient().get(Constants.URL_WS_BASE + "user/get_profissoes", new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                Log.e("response", response.toString());
-                profissoes = new ArrayList<>();
-                if(response != null) {
-                    for(int i = 0; i < response.length(); i++) {
-                        try {
-                            JSONObject jsonObject = response.getJSONObject(i);
-                            profissoes.add(new Gson().fromJson(jsonObject.toString(), Profissao.class));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
 
-                    }
+                if (response != null) {
+                    Type type = new TypeToken<List<Profissao>>() {
+                    }.getType();
+                    profissoes = gson.fromJson(response.toString(), type);
+
+                    ProfissaoAdapter arrayAdapter = new ProfissaoAdapter(getActivity(), R.layout.linha_profissao, profissoes);
+                    spnProfissao.setAdapter(arrayAdapter);
+                } else {
+                    Toast.makeText(getActivity(), "Houve um erro no carregamento da lista!", Toast.LENGTH_SHORT).show();
                 }
 
-                ProfissaoAdapter arrayAdapter = new ProfissaoAdapter(getActivity(), R.layout.linha_profissao, profissoes);
-                spnProfissao.setAdapter(arrayAdapter);
                 lytLoading.setVisibility(View.GONE);
-
 
             }
         });
@@ -95,16 +109,15 @@ public class FragmentPerfil extends Fragment {
         btnCadastrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!validarNome()) {
+                if (!validarNome()) {
                     return;
                 }
 
-                final Gson gson = new Gson();
                 String json = gson.toJson(criarPessoa());
 
                 try {
                     StringEntity stringEntity = new StringEntity(json);
-                    new AsyncHttpClient().post(null, Constants.URL_WS_BASE + "user/add", stringEntity, "application_json", new JsonHttpResponseHandler(){
+                    new AsyncHttpClient().post(null, Constants.URL_WS_BASE + "user/add", stringEntity, "application_json", new JsonHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             Log.e("response", response.toString());
@@ -135,10 +148,11 @@ public class FragmentPerfil extends Fragment {
     private User criarPessoa() {
         User pessoa = new User();
         pessoa.setCodProfissao(1);
-        pessoa.setEmail("teste@teste.com");
-        pessoa.setMiniBio("Teste MiniBio");
-        pessoa.setSexo('M');
-        pessoa.setNome("Teste");
+        pessoa.setEmail(txtEmail.getText().toString());
+        pessoa.setMiniBio(txtMiniBio.getText().toString());
+        pessoa.setSexo(rbtMasc.isChecked() ? 'M' : 'F');
+        pessoa.setNome(txtNome.getText().toString());
+        pessoa.setProfissao((Profissao) spnProfissao.getSelectedItem());
 
         return pessoa;
     }

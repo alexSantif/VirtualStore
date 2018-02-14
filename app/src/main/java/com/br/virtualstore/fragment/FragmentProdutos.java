@@ -23,6 +23,8 @@ public class FragmentProdutos extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_produtos, container, false);
+        View viewRoot = inflater.inflate(R.layout.fragment_produtos, container, false);
+
+        return viewRoot;
     }
 }
