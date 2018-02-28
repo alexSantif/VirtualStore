@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.br.virtualstore.adapter.ViewPagerAdapter;
 import com.br.virtualstore.async.AsyncUsuario;
+import com.br.virtualstore.fragment.FragmentCompras;
 import com.br.virtualstore.fragment.FragmentPerfil;
 import com.br.virtualstore.fragment.FragmentProdutos;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
@@ -48,13 +49,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        toolbar = findViewById(R.id.toolbar);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        viewPager = findViewById(R.id.viewPager);
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
         configurarViewPager(viewPager);
 
-        tabLayout = findViewById(R.id.tabs);
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
         final PrimaryDrawerItem itemPefil = new PrimaryDrawerItem()
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                         new ProfileDrawerItem()
                                 .withName("Diogo Souza")
                                 .withEmail("diogosouzac@gmail.com")
-                                .withIcon(getResources().getDrawable(R.drawable.ic_person_black_24dp))
+                                .withIcon(getResources().getDrawable(R.drawable.profile))
                 )
                 .build();
 
@@ -133,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void configurarViewPager(ViewPager viewPager) {
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPagerAdapter.addFragment(new FragmentCompras(), "Compras");
         viewPagerAdapter.addFragment(new FragmentProdutos(), "Produtos");
         viewPagerAdapter.addFragment(new FragmentPerfil(), "Perfil");
 
@@ -141,19 +144,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
