@@ -1,36 +1,33 @@
 package com.br.virtualstore.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.br.virtualstore.R;
-import com.br.virtualstore.adapter.ProdutoRecyclerAdapter;
-import com.br.virtualstore.entity.Produto;
 import com.br.virtualstore.util.Constants;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.JsonHttpResponseHandler;
+import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
+import java.util.ArrayList;
 
-import java.lang.reflect.Type;
-import java.util.List;
-
-import cz.msebera.android.httpclient.Header;
+import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
+import it.gmariotti.cardslib.library.cards.actions.IconSupplementalAction;
+import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
+import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
+import it.gmariotti.cardslib.library.recyclerview.view.CardRecyclerView;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
 /**
@@ -50,46 +47,124 @@ public class FragmentCompras extends Fragment {
         View viewRoot = inflater.inflate(R.layout.fragment_compras, container, false);
 
         final RelativeLayout lytLoading = viewRoot.findViewById(R.id.lytLoading);
-        lytLoading.setVisibility(View.VISIBLE);
+        lytLoading.setVisibility(View.GONE);
 
         Card card = new Card(getContext());
 
-        CardHeader header = new CardHeader(getContext());
-        header.setTitle("Mochila Mickey");
+        CardHeader header = new CompraInnerHeader(getContext());
 
-        header.setPopupMenu(R.menu.menu_main, new CardHeader.OnClickCardHeaderPopupMenuListener(){
+        header.setPopupMenu(R.menu.menu_main, new CardHeader.OnClickCardHeaderPopupMenuListener() {
             @Override
             public void onMenuItemClick(BaseCard card, MenuItem item) {
-                Toast.makeText(getActivity(), "Click on "+item.getTitle(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        header.setPopupMenuPrepareListener(new CardHeader.OnPrepareCardHeaderPopupMenuListener() {
-            @Override
-            public boolean onPreparePopupMenu(BaseCard card, PopupMenu popupMenu) {
-                popupMenu.getMenu().add("Refazer a compra");
-                return true;
+                Toast.makeText(getActivity(), "Click on " + item.getTitle(), Toast.LENGTH_SHORT).show();
             }
         });
 
         card.addCardHeader(header);
 
-        CardViewNative cardView = (CardViewNative) viewRoot.findViewById(R.id.carddemo);
+        CardViewNative cardView = viewRoot.findViewById(R.id.carddemo);
         cardView.setCard(card);
 
-        new AsyncHttpClient().get(Constants.URL_WS_BASE + "produto/list", new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+        Card cardCollapse = new Card(getContext());
 
-                lytLoading.setVisibility(View.GONE);
-            }
-
+        header = new CardHeader(getContext());
+        header.setOtherButtonVisible(true);
+        header.setOtherButtonDrawable(R.drawable.ic_notifications_none_24dp);
+        header.setOtherButtonClickListener(new CardHeader.OnClickCardHeaderOtherButtonListener() {
             @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Toast.makeText(getActivity(), "Falha: " + responseString, Toast.LENGTH_SHORT).show();
+            public void onButtonItemClick(Card card, View view) {
+                Toast.makeText(getActivity(), "Click on Other Button", Toast.LENGTH_LONG).show();
             }
         });
+        header.setTitle("Mochila Mickey");
+        cardCollapse.addCardHeader(header);
+
+        CardViewNative cardViewCollapse = viewRoot.findViewById(R.id.cardCollapse);
+        cardViewCollapse.setCard(cardCollapse);
+
+        //TextView txtTitulo = (TextView) cardViewMaterial.findViewById(R.id.card_main_inner_simple_title);
+        //txtTitulo.setTextColor(Color.GREEN);
+
+        CardArrayRecyclerViewAdapter mCardArrayAdapter = new CardArrayRecyclerViewAdapter(getActivity(), carregarMaterialRecycler(viewRoot));
+
+        //Staggered grid view
+        CardRecyclerView mRecyclerView = viewRoot.findViewById(R.id.carddemo_recyclerview);
+        mRecyclerView.setHasFixedSize(false);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        //Set the empty view
+        if (mRecyclerView != null) {
+            mRecyclerView.setAdapter(mCardArrayAdapter);
+        }
 
         return viewRoot;
+    }
+
+    private ArrayList<Card> carregarMaterialRecycler(View viewRoot) {
+        ArrayList<Card> cards = new ArrayList<Card>();
+        for (int i = 0; i < 3; i++) {
+            // Set supplemental actions as icon
+            ArrayList<BaseSupplementalAction> actions = new ArrayList<>();
+
+            IconSupplementalAction t1 = new IconSupplementalAction(getActivity(), R.id.ic1);
+            t1.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                    Toast.makeText(getActivity(), " Click on Text SHARE ", Toast.LENGTH_SHORT).show();
+                }
+            });
+            actions.add(t1);
+
+            IconSupplementalAction t2 = new IconSupplementalAction(getActivity(), R.id.ic2);
+            t2.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                    Toast.makeText(getActivity(), " Click on Text LEARN ", Toast.LENGTH_SHORT).show();
+                }
+            });
+            actions.add(t2);
+
+            MaterialLargeImageCard cardMaterial =
+                    MaterialLargeImageCard.with(getActivity())
+                            .setTextOverImage("Italian Beaches " + i)
+                            .setTitle("Titulo Exemplo " + i)
+                            .setSubTitle("Subtitulo Exemplo " + i)
+                            .useDrawableExternal(new MaterialLargeImageCard.DrawableExternal() {
+                                @Override
+                                public void setupInnerViewElements(ViewGroup parent, View viewImage) {
+                                    Picasso.with(getActivity())
+                                            .load("http://www.best-beaches.com/images/europe/italy-beach.jpg")
+                                            .error(R.drawable.header)
+                                            .into((ImageView) viewImage);
+                                }
+                            })
+                            .setupSupplementalActions(R.layout.carddemo_native_material_supplemental_actions_large_icon, actions)
+                            .build();
+
+            CardViewNative cardViewMaterial = viewRoot.findViewById(R.id.carddemo_largeimage);
+            cardViewMaterial.setCard(cardMaterial);
+
+            cards.add(cardMaterial);
+        }
+
+        return cards;
+    }
+
+    private class CompraInnerHeader extends CardHeader {
+
+        public CompraInnerHeader(Context context) {
+            super(context, R.layout.linha_header_compra);
+        }
+
+        @Override
+        public void setupInnerViewElements(ViewGroup parent, View view) {
+            TextView txtTitulo = view.findViewById(R.id.txtTitulo);
+            TextView txtDescricao = view.findViewById(R.id.txtDescricao);
+            ImageView imgProduto = view.findViewById(R.id.imgProduto);
+
+            txtTitulo.setText("Profissão Teste");
+            txtDescricao.setText("Descrição Teste");
+            Picasso.with(imgProduto.getContext()).load(Constants.URL_WEB_BASE + "img/produtos/colecao_lapis_cor.jpg").into(imgProduto);
+        }
     }
 }
