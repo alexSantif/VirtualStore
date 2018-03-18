@@ -1,5 +1,9 @@
 package com.br.virtualstore;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -7,6 +11,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -17,6 +22,8 @@ import android.widget.Toast;
 
 import com.br.virtualstore.adapter.ViewPagerAdapter;
 import com.br.virtualstore.async.AsyncUsuario;
+import com.br.virtualstore.entity.ProdutoNotification;
+import com.br.virtualstore.firebase.MyFirebaseMessagingService;
 import com.br.virtualstore.fragment.FragmentCompras;
 import com.br.virtualstore.fragment.FragmentPerfil;
 import com.br.virtualstore.fragment.FragmentProdutos;
@@ -34,6 +41,8 @@ import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
+import java.io.Serializable;
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -43,20 +52,25 @@ public class MainActivity extends AppCompatActivity {
 
     private Drawer drawer;
 
+    private BroadcastReceiver registrationBroadcastReceiver;
+
     private static final long ID_ND_FOOTER = 500;
+
+    private static final String REGISTRATION_COMPLETE = "REGISTRATION_COMPLETE";
+    private static final String PUSH = "PUSH";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPager = findViewById(R.id.viewPager);
         configurarViewPager(viewPager);
 
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout = findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
         final PrimaryDrawerItem itemPefil = new PrimaryDrawerItem()
@@ -112,6 +126,14 @@ public class MainActivity extends AppCompatActivity {
                 .withName("Sobre o App")
                 .withIcon(GoogleMaterial.Icon.gmd_info)
                 .withIdentifier(ID_ND_FOOTER));
+
+        Serializable serializable = getIntent().getExtras() != null ? getIntent().getExtras().getSerializable("nf_produto") : null;
+        if (serializable != null) {
+            ProdutoNotification nf_produto = (ProdutoNotification) serializable;
+            Toast.makeText(MainActivity.this, nf_produto.toString(), Toast.LENGTH_SHORT).show();
+        }
+
+     //   configurarFCM();
     }
 
     private void configuraItensDrawer(int position, IDrawerItem drawerItem) {
@@ -158,4 +180,27 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+   /* private void configurarFCM() {
+        registrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String token = intent.getStringExtra("token");
+                Toast.makeText(MainActivity.this, "Token: " + token, Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        Intent intent = new Intent(this, MyFirebaseMessagingService.class);
+        intent.putExtra("key", "register");
+        startService(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(registrationBroadcastReceiver, new IntentFilter(REGISTRATION_COMPLETE));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(registrationBroadcastReceiver, new IntentFilter(PUSH));
+    }*/
 }

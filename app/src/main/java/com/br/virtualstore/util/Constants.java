@@ -6,8 +6,8 @@ package com.br.virtualstore.util;
 
 public class Constants {
 
-    public static final String URL_WS_BASE = "http://192.168.2.101:8082/rest-web/rest/";
+    public static final String URL_WS_BASE = "http://192.168.2.100:8080/rest-web/rest/";
 
-    public static final String URL_WEB_BASE = "http://192.168.2.101:8082/rest-web/";
+    public static final String URL_WEB_BASE = "http://192.168.2.100:8080/rest-web/";
 
 }

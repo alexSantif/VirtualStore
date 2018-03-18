@@ -99,7 +99,7 @@ public class FragmentCompras extends Fragment {
             mRecyclerView.setAdapter(mCardArrayAdapter);
         }
 
-        NotificationCompat.Builder mBuilder =
+     /*   NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(getActivity())
                         .setSmallIcon(R.drawable.ic_person_24dp)
                         .setContentTitle("My notification")
@@ -108,7 +108,7 @@ public class FragmentCompras extends Fragment {
         int mNotificationId = 001;
         NotificationManager mNotifyMgr =
                 (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        mNotifyMgr.notify(mNotificationId, mBuilder.build());*/
 
         return viewRoot;
     }
